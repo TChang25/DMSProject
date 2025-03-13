@@ -1,3 +1,12 @@
+/**
+ * Tommy Chang
+ * CEN 3024 - Software Development 1
+ * March 12, 2025
+ * App.tsx
+ * This application is built using react, shadcn, and deployed into github pages.
+ * The purpose of this application is to provide a GUI for creating/reading/updating/deleting reviews for restaurants
+*/
+
 import React, { useEffect, useRef } from 'react'
 import { useState } from 'react'
 import './App.css'
@@ -61,9 +70,7 @@ interface CustomerReview {
   lastUpdated: string;
   restaurantId: number;
 }
-//CreateRestaurant("Gordon's Delight", "123-456-8888", "123 Way out there dr", "Casual", 0, 0);
-  //      CreateRestaurant("Gordon's Trashcan", "123-456-8889", "123 Way out there but to the left dr", "Fine Dining", 0, 0);
-    //    CreateRestaurant("Gordon's Zoo", "123-456-8880", "123 Way out there but to the right dr", "Zoo", 0, 0);
+
 const initialRestaurants:restaurant[] = [
   {
     id: 0,
@@ -132,7 +139,17 @@ const CustomerReviewEditFormSchema = z.object({
   })
 })
 
+/**
+ * method: App
+ * parameters: none
+ * return: react component
+ * purpose: returns the component of this Single Page Application
+ */
 function App() {
+
+  /*
+  * Hooks section
+  */
   const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
   const [restaurants, setRestaurants] = useState<restaurant[]>(initialRestaurants);
   const [reviewToBeEdited, setReviewToBeEdited] = useState<CustomerReview>();
@@ -164,7 +181,16 @@ function App() {
   })
   
 
-
+  /*
+  * Crud Function Section
+  */
+  
+  /**
+  * method: addReview
+  * parameters: string, string, number, string, number
+  * return: boolean
+  * purpose: creates a review given review type parameters. Returns true/false on success
+  */
   function addReview(title:string, comment:string, rating:number, customerName:string, restaurantId:number){
     
     if (title.length === 0 || 
@@ -200,24 +226,41 @@ function App() {
     return true;
   }
 
+  /**
+  * method: updateReview
+  * parameters: number, string, number
+  * return: boolean
+  * purpose: updates a review given review type parameters. Returns true/false on success
+  */
   function updateReview(id:number, comment:string, rating:number){
     const lastUpdated = "3/11/2025";
-    
-    setCustomerReviews(customerReviews.filter((oldReview) => 
-      {
-        if (oldReview.id === id){
-          oldReview.rating = rating;
-          oldReview.comment = comment;
-          oldReview.lastUpdated = lastUpdated;
-          return oldReview;
-        }
-        else{
-          return oldReview;
-        }
-      })
-    );
+    try{
+      setCustomerReviews(customerReviews.filter((oldReview) => 
+        {
+          if (oldReview.id === id){
+            oldReview.rating = rating;
+            oldReview.comment = comment;
+            oldReview.lastUpdated = lastUpdated;
+            return oldReview;
+          }
+          else{
+            return oldReview;
+          }
+        })
+      );
+    }
+    catch (error){
+      return false;
+    }
+    return true;
   }
 
+  /**
+  * method: updateReview
+  * parameters: string
+  * return: boolean
+  * purpose: processes a review through an uploaded file.
+  */
   function processFileUpload(filecontents:String){
     if (filecontents){
       let inputArr = filecontents.split("\r\n");
@@ -250,38 +293,80 @@ function App() {
     
   }
 
+  /**
+  * method: deleteReview
+  * parameters: number, string, number
+  * return: boolean
+  * purpose: updates a review given review type parameters. Returns true/false on success
+  */
   function deleteReview(id:number){  
-    setCustomerReviews(customerReviews.filter((oldReview) => 
-      {
-        if (oldReview.id === id){
-          
-        }
-        else{
-          return oldReview;
-        }
-      })
-    );
+    try{
+      setCustomerReviews(customerReviews.filter((oldReview) => 
+        {
+          if (oldReview.id === id){
+            
+          }
+          else{
+            return oldReview;
+          }
+        })
+      );
+      return true;
+    }
+    catch(error){
+      return false;
+    }
   }
 
+  /**
+  * method: onSubmit
+  * parameters: CustomerReviewFormSchema
+  * return: none
+  * purpose: handles button click for creating reviews
+  */
   function onSubmit(values: z.infer<typeof CustomerReviewFormSchema>) {
     addReview(values.title, values.comment, Number(values.rating), values.customerName, Number(values.restaurantID));
     toast.success("Review has been created.")
   }
 
+  /**
+  * method: onSubmitUpdate
+  * parameters: CustomerReviewEditFormSchema
+  * return: none
+  * purpose: handles button click for updating reviews
+  */
   function onSubmitUpdate(values: z.infer<typeof CustomerReviewEditFormSchema>) {
     updateReview(values.id, values.comment, Number(values.rating));
     toast.success("Review ID " + values.id + " has been updated." )
   }
 
+  /**
+  * method: onSubmitDelete
+  * parameters: CustomerReviewEditFormSchema
+  * return: none
+  * purpose: handles button click for deleting reviews
+  */
   function onSubmitDelete(values: z.infer<typeof CustomerReviewEditFormSchema>) {
     deleteReview(values.id);
     toast.success("Review ID " + values.id + " has been deleted." )
   }
 
+  /**
+  * method: handleRestaurantClick
+  * parameters: CustomerReviewFormSchema
+  * return: none
+  * purpose: provides function callback for changing state of restaurant selected
+  */
   const handleRestaurantClick = (e: React.SyntheticEvent) => {
     setRestaurantSelect(Number(e.currentTarget.id));
   }
 
+  /**
+  * method: handleOnUpload
+  * parameters: CustomerReviewFormSchema
+  * return: none
+  * purpose: provides function callback for validating input file is .txt and then processes the file using helper
+  */
   const handleOnUpload = () => {
     if (fileInputRef.current?.files){
       const file = fileInputRef.current.files[0];
@@ -305,10 +390,22 @@ function App() {
     }
   }
 
+  /**
+  * method: getReviews
+  * parameters: number
+  * return: customerReviews[]
+  * purpose: provides callback function for filtering customerReviews based on RestaurantSelect
+  */
   const getReviews = (restaurantSelect:Number) => {
     return (customerReviews.filter(review => review.restaurantId === restaurantSelect));
   }
 
+  /**
+  * method: updateRestaurantRatings
+  * parameters: number, number, number
+  * return: restaurant
+  * purpose: provides callback function for updating restaurant rating information
+  */
   const updateRestaurantRatings = (restaurantId:number, rating:number, ratingCount:number) => {
     setRestaurants(restaurants.filter((restaurant) => {
       if (restaurant.id === restaurantId){
@@ -323,17 +420,23 @@ function App() {
     );
   }
 
+  /**
+  * method: getRestaurantGrade
+  * parameters: number, number, number
+  * return: string
+  * purpose: custom action provides callback function for retrieving relevant restaurant grade
+  */
   const getRestaurantGrade = (rating:number) => {
     if (rating === 5){
       return "A";
     }
-    else if (rating > 4){
+    else if (rating >= 4){
         return "B";
     }
-    else if (rating > 3){
+    else if (rating >= 3){
         return "C";
     }
-    else if (rating > 2){
+    else if (rating >= 2){
         return "D";
     }
     else if (rating >= 1){
@@ -344,6 +447,10 @@ function App() {
     }
   }
 
+  /*
+  * useEffect section
+  * - simulates the synchronization between a website and external source (database)
+  */
   useEffect(() => {
 
   }, [restaurantSelect]);
@@ -380,6 +487,9 @@ function App() {
       ); 
     }
   }, [reviewToBeEdited, editForm.reset]);
+  /*
+  * - HTML + in-line TSX to create a single-page application.
+  */
   return (
     <>
       <Tabs defaultValue="restaurants" className="w-[1200px]">
@@ -444,23 +554,332 @@ function App() {
                 getReviews(restaurantSelect) && 
                   getReviews(restaurantSelect).map((review) => {
                     return (
-                        <div className="items-center" key={review.id} id={String(review.id)} >
-                          <Card className="w-4/5">
-                            <CardHeader>
-                              <CardTitle>{review.title}</CardTitle>
-                              <CardDescription>{restaurants[review.restaurantId].name + " " + review.rating + " out of 5"}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              {review.comment}
-                            </CardContent>
-                            <CardFooter>
-                              <ul>
-                                <li>Published: {review.publishDate}</li>
-                                <li>Last Update: {review.lastUpdated}</li>
-                              </ul>
-                            </CardFooter>
-                          </Card>
+                        
+                      <Card key={review.id} id={String(review.id)} className="w-4/5">
+                      <CardHeader>
+                        <CardTitle>{review.title}</CardTitle>
+                        <CardDescription>{restaurants[review.restaurantId].name + " " + review.rating + " out of 5"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="break-words whitespace-normal">
+                          {review.comment}
+                        </p>
+                        
+                      </CardContent>
+                      <CardFooter className='justify-between'>
+                        <ul>
+                          <li>Review ID: {review.id}</li>
+                          <li>Customer Name: {review.customerName}</li>
+                          <li>Published: {review.publishDate}</li>
+                          <li>Last Update: {review.lastUpdated}</li>
+                        </ul>
+                        <div>
+
+                        
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button onClick={() => {setReviewToBeEdited(review);}} variant="destructive" >Delete</Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[800px]">
+                            <DialogHeader>
+                              <DialogTitle>Delete review</DialogTitle>
+                              <DialogDescription>
+                                Delete a review. Click confirm if you're absolutely sure.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <Form {...editForm}>
+                            <form onSubmit={editForm.handleSubmit(onSubmitDelete)} className="space-y-8">
+                              <div className="grid grid-cols-6 gap-2">
+                                <div className="col-span-6">
+                                  <FormField
+                                  control={editForm.control}
+                                  name="id"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>ID</FormLabel>
+                                      <FormControl>
+                                        <Input disabled={true} placeholder="Write your name or anyone else's here" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                  />
+                                </div>
+                                <div className="col-span-6">
+                                  <FormField
+                                  control={editForm.control}
+                                  name="customerName"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Customer Name</FormLabel>
+                                      <FormControl>
+                                        <Input disabled={true} placeholder="Write your name or anyone else's here" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                <FormField
+                                  control={editForm.control}
+                                  name="restaurantID"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Restaurant Name</FormLabel>
+                                      <Select disabled={true} onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger className="w-full">
+                                            <SelectValue  placeholder="Select the rating for the restaurant" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="0">Gordon's Delight</SelectItem>
+                                          <SelectItem value="1">Gordon's Trashcan</SelectItem>
+                                          <SelectItem value="2">Gordon's Zoo</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormDescription>
+                                        
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                </div>
+                                <div className="col-span-3">
+                                  <FormField
+                                    control={editForm.control}
+                                    name="rating"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Rating</FormLabel>
+                                        <Select disabled={true} onValueChange={field.onChange} defaultValue={field.value}>
+                                          <FormControl>
+                                            <SelectTrigger className="w-full overflow-hidden">
+                                              <SelectValue  placeholder="Select the rating for the restaurant" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            <SelectItem value="1">1 - The worst restaurant ever.</SelectItem>
+                                            <SelectItem value="2">2 - Below Mid</SelectItem>
+                                            <SelectItem value="3">3 - Mid</SelectItem>
+                                            <SelectItem value="4">4 - Slightly worse than the best Restaurant.</SelectItem>
+                                            <SelectItem value="5">5 - The best restaurant ever.</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <FormDescription>
+                                          
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                <div className="col-span-6">
+                                    
+                                  <FormField
+                                    control={editForm.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Title</FormLabel>
+                                        <FormControl>
+                                          <Input disabled={true} placeholder="This is the title of your review." {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                          
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={editForm.control}
+                                    name="comment"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Comment</FormLabel>
+                                        <FormControl>
+                                          <Textarea disabled={true} placeholder="Write a wonderful comment about your expereince." {...field}/>
+                                        </FormControl>
+                                        <FormDescription>
+                                          
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+                            
+                            <DialogFooter>
+                              <Button className="float-right" variant="destructive" type="submit">Confirm</Button>
+                            </DialogFooter>
+                            </form>
+                            </Form>
+                          </DialogContent>
+                        </Dialog>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button onClick={() => {setReviewToBeEdited(review);}} variant="outline">Edit</Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[525px]">
+                            <DialogHeader>
+                              <DialogTitle>Edit review</DialogTitle>
+                              <DialogDescription>
+                                Make changes to a review. Click save when you're done.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <Form {...editForm}>
+                            <form onSubmit={editForm.handleSubmit(onSubmitUpdate)} className="space-y-8">
+                              <div className="grid grid-cols-6 gap-2">
+                                <div className="col-span-6">
+                                  <FormField
+                                  control={editForm.control}
+                                  name="id"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>ID</FormLabel>
+                                      <FormControl>
+                                        <Input disabled={true} placeholder="Write your name or anyone else's here" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                  />
+                                </div>
+                                <div className="col-span-6">
+                                  <FormField
+                                  control={editForm.control}
+                                  name="customerName"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Customer Name</FormLabel>
+                                      <FormControl>
+                                        <Input disabled={true} placeholder="Write your name or anyone else's here" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                <FormField
+                                  control={editForm.control}
+                                  name="restaurantID"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Restaurant Name</FormLabel>
+                                      <Select  disabled={true} onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select the rating for the restaurant" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="0">Gordon's Delight</SelectItem>
+                                          <SelectItem value="1">Gordon's Trashcan</SelectItem>
+                                          <SelectItem value="2">Gordon's Zoo</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormDescription>
+                                        
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                </div>
+                                <div className="col-span-3">
+                                  <FormField
+                                    control={editForm.control}
+                                    name="rating"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Rating</FormLabel>
+                                        <Select  onValueChange={field.onChange} defaultValue={field.value}>
+                                          <FormControl>
+                                            <SelectTrigger className="w-full overflow-hidden">
+                                              <SelectValue placeholder="Select the rating for the restaurant" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            <SelectItem value="1">1 - The worst restaurant ever.</SelectItem>
+                                            <SelectItem value="2">2 - Below Mid</SelectItem>
+                                            <SelectItem value="3">3 - Mid</SelectItem>
+                                            <SelectItem value="4">4 - Slightly worse than the best Restaurant.</SelectItem>
+                                            <SelectItem value="5">5 - The best restaurant ever.</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <FormDescription>
+                                          
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                <div className="col-span-6">
+                                    
+                                  <FormField
+                                    control={editForm.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Title</FormLabel>
+                                        <FormControl>
+                                          <Input disabled={true} placeholder="This is the title of your review." {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                          
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={editForm.control}
+                                    name="comment"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Comment</FormLabel>
+                                        <FormControl>
+                                          <Textarea placeholder="Write a wonderful comment about your expereince." {...field}/>
+                                        </FormControl>
+                                        <FormDescription>
+                                          
+                                        </FormDescription>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+                            
+                            <DialogFooter>
+                              <Button className="float-right" type="submit">Save changes</Button>
+                            </DialogFooter>
+                            </form>
+                            </Form>
+                          </DialogContent>
+                        </Dialog>
                         </div>
+                      </CardFooter>
+                    </Card>
+
                     )
                   })
 
@@ -505,7 +924,7 @@ function App() {
                                 <DialogTrigger asChild>
                                   <Button onClick={() => {setReviewToBeEdited(review);}} variant="destructive" >Delete</Button>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-[525px]">
+                                <DialogContent className="sm:max-w-[800px]">
                                   <DialogHeader>
                                     <DialogTitle>Delete review</DialogTitle>
                                     <DialogDescription>
@@ -587,7 +1006,7 @@ function App() {
                                               <FormLabel>Rating</FormLabel>
                                               <Select disabled={true} onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
-                                                  <SelectTrigger className="w-full">
+                                                  <SelectTrigger className="w-full overflow-hidden">
                                                     <SelectValue  placeholder="Select the rating for the restaurant" />
                                                   </SelectTrigger>
                                                 </FormControl>
@@ -737,7 +1156,7 @@ function App() {
                                               <FormLabel>Rating</FormLabel>
                                               <Select  onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
-                                                  <SelectTrigger className="w-full">
+                                                  <SelectTrigger className="w-full overflow-hidden">
                                                     <SelectValue placeholder="Select the rating for the restaurant" />
                                                   </SelectTrigger>
                                                 </FormControl>
