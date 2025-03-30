@@ -40,4 +40,26 @@ VALUES
 (0, "Gordon's Delight", "123-456-8888", "123 Way out there dr", "Casual", 0, 0),
 (1, "Gordon's Trashcan", "123-456-8889", "123 Way out there but to the left dr", "Fine Dining", 0, 0),
 (2, "Gordon's Zoo", "123-456-8880", "123 Way out there but to the right dr", "Zoo", 0, 0);
+
+INSERT INTO customerReview 
+VALUES (0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1),
+(0, "Reaper", "Life before death", 5, "A really long wait", CURDATE(), CURDATE(), 1);
 COMMIT;
