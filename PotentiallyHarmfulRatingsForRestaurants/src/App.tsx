@@ -71,41 +71,14 @@ interface CustomerReview {
   restaurantId: number;
 }
 
-const initialRestaurants:restaurant[] = [
-  {
-    id: 0,
-    name: "Gordon's Delight",
-    phone: "123-456-8888",
-    address: "123 Way out there dr",
-    type: "Casual",
-    rating: 0,
-    ratingCount: 0
-  },
-  {
-    id: 1,
-    name: "Gordon's Trashcan",
-    phone: "123-456-8889",
-    address: "123 Way out there but to the left dr",
-    type: "Fine Dining",
-    rating: 0,
-    ratingCount: 0
-  },
-  {
-    id: 2,
-    name: "Gordon's Zoo",
-    phone: "123-456-8880",
-    address: "123 Way out there but to the right dr",
-    type: "Zoo",
-    rating: 0,
-    ratingCount: 0
-  }
-]
 const CustomerReviewFormSchema = z.object({
   title: z.string().min(1, {
     message: "Title must not be empty."
   }),
   comment: z.string().min(1, {
     message: "Comment must not be empty."
+  }).max(255, {
+    message: "Comment must be less than 255 characters."
   }),
   rating: z.string().min(1,{
     message: "Please select a number between 1 - 5."
@@ -122,17 +95,25 @@ const CustomerReviewEditFormSchema = z.object({
   id: z.number().min(0  , {
     message: "Id must not be empty."
   }),
-  title: z.string().min(1, {
+  title: z.string()
+  .max(45, {
+    message: "Title must be less than 45 characters."
+  })
+  .min(1, {
     message: "Title must not be empty."
   }),
   comment: z.string().min(1, {
     message: "Comment must not be empty."
+  }).max(255, {
+    message: "Comment must be less than 255 characters."
   }),
   rating: z.string().min(1,{
     message: "Please select a number between 1 - 5."
   }),
   customerName: z.string().min(1, {
     message: "Customer Name must not be empty."
+  }).max(45, {
+    message: "Customer Name must be less than 45 characters."
   }),
   restaurantID: z.string().min(1, {
     message: "Restaurant Name must not be empty."
@@ -151,7 +132,7 @@ function App() {
   * Hooks section
   */
   const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
-  const [restaurants, setRestaurants] = useState<restaurant[]>(initialRestaurants);
+  const [restaurants, setRestaurants] = useState<restaurant[]>([]);
   const [reviewToBeEdited, setReviewToBeEdited] = useState<CustomerReview>();
   const [restaurantSelect, setRestaurantSelect] = useState(0);
   const [reviewIds, setReviewIds] = useState(0);
@@ -191,39 +172,49 @@ function App() {
   * return: boolean
   * purpose: creates a review given review type parameters. Returns true/false on success
   */
-  function addReview(title:string, comment:string, rating:number, customerName:string, restaurantId:number){
-    
-    if (title.length === 0 || 
-      comment.length === 0 || 
-      (rating > 5 || rating < 1) || 
-      customerName.length === 0 ||
-      (restaurantId > 2 || restaurantId < 0)
+  async function addReview(title:string, comment:string, rating:number, customerName:string, restaurantId:number){
 
-    ){
+    let review:CustomerReview = {
+      id: 0,
+      title: title,
+      comment: comment,
+      rating: rating,
+      customerName: customerName,
+      restaurantId: restaurantId,
+      publishDate: "",
+      lastUpdated: ""
+    }
+    return postReview(review).then((success) => {
+      console.log(review);
+      return success;
+    }).catch((success:boolean) =>{
+      return success;
+    });
+    
+  }
+
+  const postReview = async (reviewObj:CustomerReview) => {
+    try{
+      let url = 'http://localhost:3000/customerReview/createone'
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reviewObj)
+      })
+      
+      if (!response.ok) {
+        console.log(response.status);
+      }
+      const customerReviewsTemp = await response.json();
+      setCustomerReviews(customerReviewsTemp);
+      return true;
+    }
+    catch(error){
+      console.error(error);
       return false;
     }
-    const publishDate = "3/11/2025";
-    const lastUpdated = "3/11/2025";
-    var tempReview:CustomerReview;
-    setReviewIds((prevId) => {
-      let newId = prevId + 1;
-
-      tempReview = {
-        id:newId,
-        title: title,
-        comment: comment,
-        rating: rating,
-        customerName: customerName,
-        publishDate: publishDate,
-        lastUpdated: lastUpdated,
-        restaurantId: restaurantId 
-      }
-      return newId;
-    });
-    setCustomerReviews((reviews) => [...reviews, tempReview]);
-    
-    
-    return true;
   }
 
   /**
@@ -232,31 +223,32 @@ function App() {
   * return: boolean
   * purpose: updates a review given review type parameters. Returns true/false on success
   */
-  function updateReview(id:number, comment:string, rating:number){
-    const lastUpdated = "3/11/2025";
+  async function updateReview(id:number, comment:string, rating:number){
     try{
-      setCustomerReviews(customerReviews.filter((oldReview) => 
-        {
-          if (oldReview.id === id){
-            oldReview.rating = rating;
-            oldReview.comment = comment;
-            oldReview.lastUpdated = lastUpdated;
-            return oldReview;
-          }
-          else{
-            return oldReview;
-          }
-        })
-      );
+      let url = 'http://localhost:3000/customerReview/updateone'
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({id:id, comment: comment, rating: rating})
+      })
+      
+      if (!response.ok) {
+        console.log(response.status);
+      }
+      const customerReviewsTemp = await response.json();
+      setCustomerReviews(customerReviewsTemp);
+      return true;
     }
-    catch (error){
+    catch(error){
+      console.error(error);
       return false;
     }
-    return true;
   }
 
   /**
-  * method: updateReview
+  * method: processFileUpload
   * parameters: string
   * return: boolean
   * purpose: processes a review through an uploaded file.
@@ -264,31 +256,35 @@ function App() {
   function processFileUpload(filecontents:String){
     if (filecontents){
       let inputArr = filecontents.split("\r\n");
-      let count = 1;
-      let success = 0;
-      let fail = 0;
+      var count = 1;
+      var success = 0;
+      var fail = 0;
       inputArr.forEach(review => {
         let reviewParts = review.split("-");
         //Title-Comment-Rating-CustomerName-RestaurantID
         try{
-          
-          let add = addReview(reviewParts[0], reviewParts[1], Number(reviewParts[2]), reviewParts[3], Number(reviewParts[4]))
-          if (add){
-            toast.success("Uploaded review line: " + count);
-            success += 1;
+          if (Number(reviewParts[4]) >= 3 || Number(reviewParts[4]) < 0 || reviewParts[0].length === 0 || reviewParts[3].length === 0 || reviewParts[2].length === 0){
+            throw Error()
           }
-          else{
-            toast.warning("Trouble uploading review line: " + count);
-            fail += 1;
-          }
+          addReview(reviewParts[0], reviewParts[1], Number(reviewParts[2]), reviewParts[3], Number(reviewParts[4])).then((add) => {
+            if (add){
+              success += 1;
+            }
+            else{
+              toast.warning("Trouble uploading review line: " + count);
+              fail += 1;
+            }
+          });
         }
         catch (error){
           toast.warning("Trouble uploading review line: " + count);
           fail += 1;
         }
         count++;
-      }); 
-      toast.success("Uploaded " + success + " reviews, failed " + fail)
+        
+      });
+      setTimeout(() => {toast.success("Uploaded " + success + " reviews, failed " + fail)}, 200); 
+      
     }
     
   }
@@ -299,21 +295,26 @@ function App() {
   * return: boolean
   * purpose: updates a review given review type parameters. Returns true/false on success
   */
-  function deleteReview(id:number){  
+  async function deleteReview(id:number){  
     try{
-      setCustomerReviews(customerReviews.filter((oldReview) => 
-        {
-          if (oldReview.id === id){
-            
-          }
-          else{
-            return oldReview;
-          }
-        })
-      );
+      let url = 'http://localhost:3000/customerReview/deleteone'
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({id: id})
+      })
+      
+      if (!response.ok) {
+        console.log(response.status);
+      }
+      const customerReviewsTemp = await response.json();
+      setCustomerReviews(customerReviewsTemp);
       return true;
     }
     catch(error){
+      console.error(error);
       return false;
     }
   }
@@ -347,8 +348,12 @@ function App() {
   * purpose: handles button click for deleting reviews
   */
   function onSubmitDelete(values: z.infer<typeof CustomerReviewEditFormSchema>) {
-    deleteReview(values.id);
-    toast.success("Review ID " + values.id + " has been deleted." )
+    deleteReview(values.id).then((value) => {
+      if (value){
+        toast.success("Review ID " + values.id + " has been deleted." );
+      }
+    });
+    
   }
 
   /**
@@ -487,6 +492,27 @@ function App() {
       ); 
     }
   }, [reviewToBeEdited, editForm.reset]);
+
+  // initialize restaurant data on startup
+  useEffect(() => {
+    
+    const getRestaurants = async () => {
+      const response = await fetch('http://localhost:3000/restaurant/all');
+      const data: restaurant[] = await response.json();
+      console.log(data);
+      setRestaurants(data);
+    }
+    const getReviews = async () => {
+      const response = await fetch('http://localhost:3000/customerReview/all');
+      const data: CustomerReview[] = await response.json();
+      console.log(data);
+      setCustomerReviews(data);
+    }
+    getRestaurants();
+    getReviews();
+  
+
+  },[])
   /*
   * - HTML + in-line TSX to create a single-page application.
   */
@@ -504,7 +530,7 @@ function App() {
             <div className="col-span-2">
               Click a restaurant card to display the reviews.
               <ul>
-              {
+              { restaurants.length > 0 &&
                 restaurants.map((restaurant) => {
                   return (
                       <li className="cursor-pointer" key={restaurant.id} id={String(restaurant.id)} onClick={handleRestaurantClick}>
@@ -547,11 +573,11 @@ function App() {
             </div>
 
             <div className="col-span-4">
-              Showing all reviews related to Restaurant <strong>{restaurants[restaurantSelect].name}</strong>
+              Showing all reviews related to Restaurant <strong>{restaurants.length > 0 && restaurants[restaurantSelect].name}</strong>
               {getReviews(restaurantSelect).length === 0 && <p>There are currently no reviews for this restaurant </p>}
               
               {
-                getReviews(restaurantSelect) && 
+                getReviews(restaurantSelect) && restaurants.length > 0 &&
                   getReviews(restaurantSelect).map((review) => {
                     return (
                         
@@ -895,7 +921,7 @@ function App() {
               {customerReviews.length === 0 && <p>There are currently no reviews at all. </p>}
               {customerReviews.length > 0 && <p>All reviews are listed below.</p>}
               {
-                customerReviews.length > 0 && 
+                customerReviews.length > 0 && restaurants.length > 0 &&
                 customerReviews.map((review) => {
                     return (
 
